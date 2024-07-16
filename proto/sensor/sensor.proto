@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package sensor;
-option go_package = "project/proto";
+option go_package = "github.com/jayd-lee/RPiDataMicroservices/proto/sensor";
 
 message SensorData {
   string device_id = 1;
@@ -11,11 +11,28 @@ message SensorData {
   string timestamp = 5;
 }
 
-service SensorService {
-  rpc StreamSensorData(SensorData) returns (SensorResponse) {}
-}
-
 message SensorResponse {
   bool success = 1;
   string message = 2;
+}
+
+message AnalyticsRequest {
+  string device_id = 1;
+  string metric = 2;
+  string interval = 3;
+}
+
+message AnalyticsResponse {
+  double average = 1;
+  double minimum = 2;
+  double maximum = 3;
+  string interval = 4;
+}
+
+service SensorService {
+  rpc StreamSensorData(SensorData) returns (SensorResponse);
+}
+
+service AnalyticsService {
+  rpc GetMetrics(AnalyticsRequest) returns (AnalyticsResponse);
 }

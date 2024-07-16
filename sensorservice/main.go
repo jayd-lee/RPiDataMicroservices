@@ -3,6 +3,9 @@ package main
 import (
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	pb "github.com/jayd-lee/RPiDataMicroservices/proto/sensor"
@@ -39,12 +42,25 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create handler after %d attempts: %v", maxRetries, err)
 	}
+	defer sensorHandler.Close()
+
+	// Set up signal handling for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterSensorServiceServer(grpcServer, sensorHandler)
 
-	log.Printf("Starting gRPC server on port %s", port)
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	// Start server in a goroutine
+	go func() {
+		log.Printf("Starting gRPC server on port %s", port)
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
+	// Wait for interrupt signal
+	<-sigChan
+	log.Println("Shutting down gracefully...")
+	grpcServer.GracefulStop()
 }

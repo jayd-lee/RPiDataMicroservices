@@ -25,6 +25,18 @@ sensor/gosensor/sensor: sensor/gosensor/main.go sensor/csensor/libsensor.a
 sensorservice/service: sensorservice/main.go
 	cd sensorservice && $(GO) build -o service
 
+dbservice/service: dbservice/main.go
+	cd dbservice && $(GO) build -o service
+
+analyticsservice/service: analyticsservice/main.go
+	cd analyticsservice && $(GO) build -o service
+
+run-db: dbservice/service
+	./dbservice/service
+
+run-analytics: analyticsservice/service
+	./analyticsservice/service
+
 clean:
 	rm -f sensor/csensor/*.o sensor/csensor/*.a sensor/csensor/sensor
 	rm -f sensor/gosensor/sensor
