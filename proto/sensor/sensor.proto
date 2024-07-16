@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package sensor;
+option go_package = "project/proto";
+
+message SensorData {
+  string device_id = 1;
+  string location = 2;
+  double temperature = 3;
+  double humidity = 4;
+  string timestamp = 5;
+}
+
+service SensorService {
+  rpc StreamSensorData(SensorData) returns (SensorResponse) {}
+}
+
+message SensorResponse {
+  bool success = 1;
+  string message = 2;
+}
